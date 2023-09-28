@@ -10,4 +10,4 @@ def connect_url():
     mongodb_name = config.get('MongoDB', 'mongo_db')
     domain = config.get('MongoDB', 'domain')
 
-    connect(host=f"""mongodb+srv://{mongo_user}:{mongodb_pass}@{domain}/?retryWrites=true&w=majority""", ssl=True)
+    connect(host=f"""mongodb+srv://{mongo_user}:{mongodb_pass}@{domain}/{mongodb_name}?retryWrites=true&w=majority""", ssl=True)

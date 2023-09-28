@@ -1,6 +1,5 @@
 import scrapy
 import pymongo
-from ..items import QuoteItem, AuthorItem
 
 class QuotesSpider(scrapy.Spider):
     name = 'quotes'
@@ -24,14 +23,13 @@ class QuotesSpider(scrapy.Spider):
 
     def parse(self, response):
         for quote in response.css(".quote"):
-            # print(quote)
-            quote_item = QuoteItem()
-            quote_item["text"] = quote.css("span.text::text").get()
-            quote_item["author"] = quote.css("span small::text").get()
-            quote_item["tags"] = quote.css("a.tag::text").get()
-            # print(quote_item)
+            quote_item = {
+                "text": quote.css("span.text::text").get(),
+                "author": quote.css("span small::text").get(),
+                "tags": quote.css("a.tag::text").getall(),
+            }
             yield quote_item
-            
+
         next_page = response.css("li.next a::attr(href)").get()
         if next_page:
             yield response.follow(next_page, self.parse)
@@ -59,14 +57,16 @@ class AuthorsSpider(scrapy.Spider):
         authors_urls = response.css('.author + a::attr(href)').extract()
         for author_url in authors_urls:
             yield response.follow(author_url, self.parse_authors)
-            
+
         next_page = response.css('li.next a::attr(href)').get()
         if next_page:
             yield response.follow(next_page, self.parse)
             
     def parse_authors(self, response):
-        author_item = AuthorItem()
-        author_item['fullname'] = response.css("h3.author-title::text").get().strip()
-        author_item['born'] = response.css("span.author-born-date::text").get().strip()
-        author_item['bio'] = response.css("div.author-description::text").get().strip()
+        author_item = {
+            'fullname': response.css("h3.author-title::text").get().strip(),
+            'born': response.css("span.author-born-date::text").get().strip(),
+            'location': response.css("span.author-born-location::text").get().strip(),
+            'bio': response.css("div.author-description::text").get().strip()
+        }
         yield author_item
